@@ -1,0 +1,9 @@
+utils/__pycache__
+dataset/__pycache__
+activations/__pycache__
+layers/__pycache__
+losses/__pycache__
+utils/__pycache__
+optimizers/__pycache__
+__pycache__
+dataset/data/mnist_784_csv.csv
