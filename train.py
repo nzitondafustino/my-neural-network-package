@@ -1,4 +1,4 @@
-from optimizers.optimizers import SGD
+from optimizers.optimizers import SGD, Adam, RMSProp
 from losses.cross_entropy import CrossEntropy
 from dataset.dataset import Dataset, Dataloader, MNISTDisgits
 from layers.linear import Linear
@@ -48,7 +48,9 @@ class MNISTModel:
 
 
 model = MNISTModel()
-optimizer = SGD(model, learning_rate=0.01)
+# optimizer = SGD(model, learning_rate=0.01)
+# optimizer = Adam(model, learning_rate=0.01)
+optimizer = RMSProp(model, learning_rate=0.01)
 loss = CrossEntropy()
 
 

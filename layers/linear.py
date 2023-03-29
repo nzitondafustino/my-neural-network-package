@@ -1,5 +1,6 @@
 
 import numpy as np
+from typing import Tuple
 
 class Linear:
 
@@ -31,10 +32,11 @@ class Linear:
         self.db = grad.mean(axis=0)
         return grad@self.w.T
     
-    def update_parameters(self, learning_rate: float , multiplier: float =1.0) -> None:
-        "Update parameters, If SGD is used the multiplier is 1. Multplier is different for other optimizers"
-        self.w -= learning_rate * self.dw * multiplier
-        self.b -= learning_rate * self.db * multiplier
+    def update_parameters(self,updates: Tuple[np.ndarray] ) -> None:
+        "Update parameters, Recieves updates"
+
+        self.w -= updates[0]
+        self.b -= updates[1]
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         "Enable object to be called as a method"
@@ -44,3 +46,12 @@ class Linear:
         "Reset gradient"
         self.dw = 0
         self.db = 0
+
+    def get_derivatives(self):
+        "Return derivatives"
+        return self.dw, self.db
+    
+    def get_parameteters(self):
+        "Return parameters"
+        return self.w, self.b
+
