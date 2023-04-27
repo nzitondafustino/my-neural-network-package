@@ -2,6 +2,8 @@ from optimizers.optimizers import SGD, Adam, RMSProp, SGDMomentum
 from losses.cross_entropy import CrossEntropy
 from dataset.dataset import Dataset, Dataloader, MNISTDisgits
 from layers.linear import Linear
+from layers.batchnorm import BacthNorm1d
+from layers.dropout import Dropout
 from activations.activations import ReLU
 from utils.initialization import xavier_initialization
 from misc import accuracy, plot_metrics, plot_random_results
@@ -12,12 +14,17 @@ import matplotlib.pyplot as plt
 
 #Define Model
 class MNISTModel:
+    
     def __init__(self) -> None:
         "Initialize all layers to be used a model"
+
+        self._train = True
         # initialize layers
         self.linear1 = Linear(784,1024,xavier_initialization)
+        self.b1 = BacthNorm1d(1024)
         self.relu1 = ReLU()
         self.linear2 = Linear(1024,128,xavier_initialization)
+        self.b2 = BacthNorm1d(128)
         self.relu2 = ReLU()
         self.linear3 = Linear(128,10,xavier_initialization)
 
@@ -25,11 +32,18 @@ class MNISTModel:
         "Recieve flatten image and return logits"
         # Perform forward propagation
         x = self.linear1(x)
+        x = self.b1(x,self.train)
         x = self.relu1(x)
         x = self.linear2(x)
+        x = self.b2(x,self.train)
         x = self.relu2(x)
         x = self.linear3(x)
         return x
+    
+    def train(self):
+        self._train = True
+    def eval(self):
+        self._train = False
     
     def backward(self,grad: np.ndarray) -> None:
 
@@ -37,8 +51,10 @@ class MNISTModel:
         # Perform backward propagation
         grad = self.linear3.backward(grad)
         grad = self.relu2.backward(grad)
+        grad = self.b2.backward(grad)
         grad = self.linear2.backward(grad)
         grad = self.relu1.backward(grad)
+        grad = self.b1.backward(grad)
         grad = self.linear1.backward(grad)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -48,10 +64,12 @@ class MNISTModel:
 
 
 model = MNISTModel()
+
 # optimizer = SGD(model, learning_rate=0.01)
-# optimizer = Adam(model, learning_rate=0.01)
-optimizer = RMSProp(model, learning_rate=0.01)
-optimizer = SGDMomentum(model, learning_rate=0.01)
+# optimizer = RMSProp(model, learning_rate=0.01)
+# optimizer = SGDMomentum(model, learning_rate=0.01)
+optimizer = Adam(model, learning_rate=0.01)
+
 loss = CrossEntropy()
 
 
@@ -67,7 +85,7 @@ x_rand,y_rand = next(dataloader_test)
 
 
 # Training Loop
-epochs = 50
+epochs = 100
 losses = []
 accs = []
 losses_test = []
@@ -77,6 +95,7 @@ for i in range(epochs):
     accs_t = []
     losses_tr = []
     accs_tr = []
+    model.train()
     for x,y in dataloader_train:
         optimizer.zero_grad()
         logits = model(x)
@@ -93,7 +112,7 @@ for i in range(epochs):
     losses.append(mean_l)
     accs.append(mean_acc)
     print(f"Epoch: {i+1}/{epochs}, Training Loss: {mean_l:.3f}, Train Accuracy: {mean_acc:.2f}")
-
+    model.eval()
     for x,y in dataloader_test:
         logits = model(x)
         preds  = np.argmax(logits,axis=1)

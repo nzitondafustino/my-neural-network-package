@@ -1,4 +1,6 @@
 import numpy as np
+from layers.linear import Layer
+from activations.activations import Activation
 
 class Optimizer:
     "The Base optimizer class"
@@ -7,7 +9,7 @@ class Optimizer:
         attributes = vars(self.model)
         for att in attributes:
             layer = attributes[att]
-            if layer.has_parameters():
+            if (isinstance(layer, Layer) or isinstance(layer,Activation)) and layer.has_parameters():
                 layer.zero_grad()
 
     def step(self):
@@ -27,7 +29,7 @@ class SGD(Optimizer):
         attributes = vars(self.model)
         for att in attributes:
             layer = attributes[att]
-            if layer.has_parameters():
+            if (isinstance(layer, Layer) or isinstance(layer,Activation)) and layer.has_parameters():
                 derivatives =  tuple([self.learning_rate * derivative  for derivative in layer.get_derivatives()])
                 layer.update_parameters(derivatives)
 
@@ -45,7 +47,7 @@ class SGDMomentum(Optimizer):
         attributes = vars(self.model)
         for att in attributes:
             layer = attributes[att]
-            if layer.has_parameters():
+            if (isinstance(layer, Layer) or isinstance(layer,Activation)) and layer.has_parameters():
                 derivatives =  layer.get_derivatives() # get derivatives from layer
                 if id(layer) not in self.m:
                     self.m[id(layer)] = [0] * len(derivatives)
@@ -80,7 +82,7 @@ class RMSProp(Optimizer):
         attributes = vars(self.model)
         for att in attributes:
             layer = attributes[att]
-            if layer.has_parameters():
+            if (isinstance(layer, Layer) or isinstance(layer,Activation)) and layer.has_parameters():
                 derivatives =  layer.get_derivatives() # get derivatives from layer
 
                 # initialize previous first moments for the firt derivative
@@ -119,10 +121,10 @@ class Adam(Optimizer):
         attributes = vars(self.model)
         for att in attributes:
             layer = attributes[att]
-            if layer.has_parameters():
+            if (isinstance(layer, Layer) or isinstance(layer,Activation)) and layer.has_parameters():
                 derivatives =  layer.get_derivatives() # get derivatives from layer
 
-                # initialize previous first and second moments for the firt derivative
+                # initialize first and second moments for the firt derivative
                 if id(layer) not in self.m:
                     self.m[id(layer)] = [0] * len(derivatives)
                     self.v[id(layer)] = [0] * len(derivatives)

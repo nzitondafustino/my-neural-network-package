@@ -2,9 +2,24 @@
 import numpy as np
 from typing import Tuple
 
-class Linear:
 
-    def __init__(self, input, output, init_fn) -> None:
+class Layer:
+
+    def has_parameters(self) -> bool:
+        "Return True if a layer is trainable"
+        return True
+    
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        raise NotImplemented
+    
+    def backward(self, grad : np.ndarray) -> np.ndarray:
+        "Calculate derivative"
+        raise NotImplemented
+    
+
+class Linear(Layer):
+
+    def __init__(self, input : int, output : int, init_fn : object) -> None:
         "Initialize weights"
         
         self.w = None
@@ -54,4 +69,3 @@ class Linear:
     def get_parameteters(self):
         "Return parameters"
         return self.w, self.b
-
