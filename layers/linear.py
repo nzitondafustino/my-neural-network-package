@@ -15,6 +15,7 @@ class Layer:
     def backward(self, grad : np.ndarray) -> np.ndarray:
         "Calculate derivative"
         raise NotImplemented
+        
     
 
 class Linear(Layer):
